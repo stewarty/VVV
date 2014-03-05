@@ -40,8 +40,8 @@ apt_package_check_list=(
 	# Our base packages for php5. As long as php5-fpm and php5-cli are
 	# installed, there is no need to install the general php5 package, which
 	# can sometimes install apache as a requirement.
-	php5-fpm
-	php5-cli
+	php5 
+	libapache2-mod-php5
 
 	# Common and dev packages for php
 	php5-common
@@ -59,8 +59,8 @@ apt_package_check_list=(
 	php5-gd
 	php-apc
 
-	# nginx is installed as the default web server
-	nginx
+	# apache is installed as the default web server
+	apache2
 
 	# memcached is made available for object caching
 	memcached
@@ -71,6 +71,7 @@ apt_package_check_list=(
 	# other packages that come in handy
 	imagemagick
 	subversion
+	git
 	git-core
 	zip
 	unzip
@@ -230,20 +231,20 @@ else
 fi
 
 # Configuration for nginx
-if [[ ! -e /etc/nginx/server.key ]]; then
-	echo "Generate Nginx server private key..."
-	vvvgenrsa="$(openssl genrsa -out /etc/nginx/server.key 2048 2>&1)"
-	echo $vvvgenrsa
-fi
-if [[ ! -e /etc/nginx/server.csr ]]; then
-	echo "Generate Certificate Signing Request (CSR)..."
-	openssl req -new -batch -key /etc/nginx/server.key -out /etc/nginx/server.csr
-fi
-if [[ ! -e /etc/nginx/server.crt ]]; then
-	echo "Sign the certificate using the above private key and CSR..."
-	vvvsigncert="$(openssl x509 -req -days 365 -in /etc/nginx/server.csr -signkey /etc/nginx/server.key -out /etc/nginx/server.crt 2>&1)"
-	echo $vvvsigncert
-fi
+# if [[ ! -e /etc/nginx/server.key ]]; then
+#	echo "Generate Nginx server private key..."
+#	vvvgenrsa="$(openssl genrsa -out /etc/nginx/server.key 2048 2>&1)"
+#	echo $vvvgenrsa
+# fi
+# if [[ ! -e /etc/nginx/server.csr ]]; then
+# 	echo "Generate Certificate Signing Request (CSR)..."
+# 	openssl req -new -batch -key /etc/nginx/server.key -out /etc/nginx/server.csr
+# fi
+# if [[ ! -e /etc/nginx/server.crt ]]; then
+# 	echo "Sign the certificate using the above private key and CSR..."
+# 	vvvsigncert="$(openssl x509 -req -days 365 -in /etc/nginx/server.csr -signkey /etc/nginx/server.key -out /etc/nginx/server.crt 2>&1)"
+# 	echo $vvvsigncert
+# fi
 
 echo -e "\nSetup configuration files..."
 
@@ -253,27 +254,27 @@ cp /srv/config/init/vvv-start.conf /etc/init/vvv-start.conf
 echo " * /srv/config/init/vvv-start.conf               -> /etc/init/vvv-start.conf"
 
 # Copy nginx configuration from local
-cp /srv/config/nginx-config/nginx.conf /etc/nginx/nginx.conf
-cp /srv/config/nginx-config/nginx-wp-common.conf /etc/nginx/nginx-wp-common.conf
-if [[ ! -d /etc/nginx/custom-sites ]]; then
-	mkdir /etc/nginx/custom-sites/
-fi
-rsync -rvzh --delete /srv/config/nginx-config/sites/ /etc/nginx/custom-sites/
+#cp /srv/config/nginx-config/nginx.conf /etc/nginx/nginx.conf
+#cp /srv/config/nginx-config/nginx-wp-common.conf /etc/nginx/nginx-wp-common.conf
+#if [[ ! -d /etc/nginx/custom-sites ]]; then
+#	mkdir /etc/nginx/custom-sites/
+#fi
+#rsync -rvzh --delete /srv/config/nginx-config/sites/ /etc/nginx/custom-sites/
 
-echo " * /srv/config/nginx-config/nginx.conf           -> /etc/nginx/nginx.conf"
-echo " * /srv/config/nginx-config/nginx-wp-common.conf -> /etc/nginx/nginx-wp-common.conf"
-echo " * /srv/config/nginx-config/sites/               -> /etc/nginx/custom-sites"
+#echo " * /srv/config/nginx-config/nginx.conf           -> /etc/nginx/nginx.conf"
+#echo " * /srv/config/nginx-config/nginx-wp-common.conf -> /etc/nginx/nginx-wp-common.conf"
+#echo " * /srv/config/nginx-config/sites/               -> /etc/nginx/custom-sites"
 
 # Copy php-fpm configuration from local
-cp /srv/config/php5-fpm-config/www.conf /etc/php5/fpm/pool.d/www.conf
-cp /srv/config/php5-fpm-config/php-custom.ini /etc/php5/fpm/conf.d/php-custom.ini
-cp /srv/config/php5-fpm-config/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini
-cp /srv/config/php5-fpm-config/apc.ini /etc/php5/fpm/conf.d/apc.ini
+#cp /srv/config/php5-fpm-config/www.conf /etc/php5/fpm/pool.d/www.conf
+#cp /srv/config/php5-fpm-config/php-custom.ini /etc/php5/fpm/conf.d/php-custom.ini
+#cp /srv/config/php5-fpm-config/xdebug.ini /etc/php5/fpm/conf.d/xdebug.ini
+#cp /srv/config/php5-fpm-config/apc.ini /etc/php5/fpm/conf.d/apc.ini
 
-echo " * /srv/config/php5-fpm-config/www.conf          -> /etc/php5/fpm/pool.d/www.conf"
-echo " * /srv/config/php5-fpm-config/php-custom.ini    -> /etc/php5/fpm/conf.d/php-custom.ini"
-echo " * /srv/config/php5-fpm-config/xdebug.ini        -> /etc/php5/fpm/conf.d/xdebug.ini"
-echo " * /srv/config/php5-fpm-config/apc.ini           -> /etc/php5/fpm/conf.d/apc.ini"
+#echo " * /srv/config/php5-fpm-config/www.conf          -> /etc/php5/fpm/pool.d/www.conf"
+#echo " * /srv/config/php5-fpm-config/php-custom.ini    -> /etc/php5/fpm/conf.d/php-custom.ini"
+#echo " * /srv/config/php5-fpm-config/xdebug.ini        -> /etc/php5/fpm/conf.d/xdebug.ini"
+#echo " * /srv/config/php5-fpm-config/apc.ini           -> /etc/php5/fpm/conf.d/apc.ini"
 
 # Copy memcached configuration from local
 cp /srv/config/memcached-config/memcached.conf /etc/memcached.conf
@@ -303,12 +304,12 @@ echo " * /srv/config/homebin                           -> /home/vagrant/bin"
 #
 # Make sure the services we expect to be running are running.
 echo -e "\nRestart services..."
-service nginx restart
+#service nginx restart
 service memcached restart
 
 # Disable PHP Xdebug module by default
-php5dismod xdebug
-service php5-fpm restart
+# php5dismod xdebug
+# service php5-fpm restart
 
 # If MySQL is installed, go through the various imports and service tasks.
 exists_mysql="$(service mysql status)"
